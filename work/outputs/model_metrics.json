@@ -1,0 +1,50 @@
+{
+  "split": "GroupKFold(5) on client_id",
+  "seed": 42,
+  "sklearn": "1.9.1",
+  "n_pages": 9664,
+  "n_clients": 28,
+  "base_rate": 0.3782,
+  "results": [
+    {
+      "method": "Baseline rule (Week 4, frozen)",
+      "roc_auc": 0.7031,
+      "p@20": 0.76,
+      "p@50": 0.696,
+      "clicks_gap@50": 0.3845,
+      "base_rate": 0.355
+    },
+    {
+      "method": "Logistic regression",
+      "roc_auc": 0.7722,
+      "p@20": 0.8,
+      "p@50": 0.768,
+      "clicks_gap@50": 0.0754,
+      "base_rate": 0.355
+    },
+    {
+      "method": "Random forest",
+      "roc_auc": 0.7909,
+      "p@20": 0.87,
+      "p@50": 0.804,
+      "clicks_gap@50": 0.2082,
+      "base_rate": 0.355
+    },
+    {
+      "method": "Gradient boosting (depth 3)",
+      "roc_auc": 0.7787,
+      "p@20": 0.86,
+      "p@50": 0.74,
+      "clicks_gap@50": 0.2734,
+      "base_rate": 0.355
+    },
+    {
+      "method": "Random forest x potential",
+      "roc_auc": 0.7168,
+      "p@20": 0.82,
+      "p@50": 0.704,
+      "clicks_gap@50": 0.4065,
+      "base_rate": 0.355
+    }
+  ]
+}
