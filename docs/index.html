@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Pages Keep Losing Clicks for Their Position? A Validated CTR Review Queue</title>
+<meta name="description" content="A validated, human-reviewed ranking of visible pages that keep under-capturing click-through rate for their search position. Built on the FlyRank ML Internship dataset.">
+<meta name="author" content="Maksim Nikolin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --ink:#1b1b19; --ink-2:#4d4c47; --ink-3:#77766f;
+  --rule:#e4e2da; --track:#efede6; --accent:#2a78d6; --accent-soft:#e7f0fb;
+  --base:#9a988f; --warn-bg:#fdf3e6; --warn-ink:#8a4b00; --leak:#e34948;
+  --serif:"Source Serif 4",Georgia,serif; --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#161615; --surface:#1e1e1c; --ink:#f1f0ea; --ink-2:#c3c2b7; --ink-3:#97968c;
+    --rule:#33332f; --track:#2a2a27; --accent:#3987e5; --accent-soft:#1d2b3d;
+    --base:#7d7b73; --warn-bg:#2d2416; --warn-ink:#f0b860; --leak:#e66767;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161615; --surface:#1e1e1c; --ink:#f1f0ea; --ink-2:#c3c2b7; --ink-3:#97968c;
+  --rule:#33332f; --track:#2a2a27; --accent:#3987e5; --accent-soft:#1d2b3d;
+  --base:#7d7b73; --warn-bg:#2d2416; --warn-ink:#f0b860; --leak:#e66767;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:19px;line-height:1.62;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:1fr;gap:0}
+@media (min-width:1100px){.wrap{grid-template-columns:220px minmax(0,720px);column-gap:56px;row-gap:0;justify-content:center}}
+header.hero{grid-column:1/-1;padding:56px 0 28px;border-bottom:1px solid var(--rule);margin-bottom:8px}
+@media (min-width:1100px){header.hero{grid-column:2}}
+.kicker{font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:700;font-size:clamp(30px,5.2vw,44px);line-height:1.12;letter-spacing:-.02em;margin:0 0 18px}
+.byline{font-family:var(--sans);font-size:14px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 22px}
+.byline b{color:var(--ink);font-weight:600}
+nav.toc{display:none}
+@media (min-width:1100px){
+  nav.toc{display:block;position:sticky;top:32px;align-self:start;margin-top:30px;grid-column:1;font-family:var(--sans);font-size:13.5px;grid-row:2}
+  nav.toc ol{list-style:none;padding:0;margin:0;border-left:1px solid var(--rule)}
+  nav.toc li a{display:block;padding:5px 0 5px 14px;color:var(--ink-3);text-decoration:none;border-left:2px solid transparent;margin-left:-1px}
+  nav.toc li a:hover,nav.toc li a.on{color:var(--ink);border-left-color:var(--accent)}
+  nav.toc .t{font-weight:600;color:var(--ink);margin:0 0 10px;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+}
+main{min-width:0}
+@media (min-width:1100px){main{grid-column:2;grid-row:2}}
+section{padding:8px 0 12px}
+h2{font-family:var(--sans);font-size:25px;line-height:1.25;letter-spacing:-.01em;margin:48px 0 14px;scroll-margin-top:24px}
+h2 .n{color:var(--ink-3);font-weight:500;margin-right:10px}
+h3{font-family:var(--sans);font-size:17px;margin:30px 0 8px}
+p{margin:0 0 16px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{margin:4px 0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82em;background:var(--track);padding:1px 5px;border-radius:4px}
+.abstract{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:22px 24px;margin:28px 0 8px}
+.abstract h2{margin:0 0 10px;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.abstract p{margin:0;font-size:18.5px}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0 4px;font-family:var(--sans)}
+.key{border-top:2px solid var(--accent);padding:10px 2px 0}
+.key .v{font-size:28px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.key .v small{font-size:15px;font-weight:500;color:var(--ink-3)}
+.key .l{font-size:13px;color:var(--ink-2);line-height:1.4;margin-top:2px}
+.key.base{border-top-color:var(--base)}
+figure{margin:28px 0 30px;padding:20px 20px 16px;background:var(--surface);border:1px solid var(--rule);border-radius:10px}
+figure .ft{font-family:var(--sans);font-weight:600;font-size:15.5px;margin:0 0 4px}
+figure .fs{font-family:var(--sans);font-size:13px;color:var(--ink-3);margin:0 0 16px}
+figcaption{font-family:var(--sans);font-size:14px;color:var(--ink-2);line-height:1.5;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule)}
+figcaption b{color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--sans);font-size:13px;color:var(--ink-2);margin:0 0 12px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px}
+.sw.m{background:var(--accent)} .sw.r{background:var(--base)}
+.sw.line{width:2px;height:14px;border-radius:0;background:var(--ink);vertical-align:-2px}
+.chart{font-family:var(--sans);font-size:13.5px}
+.grp{margin:0 0 14px}
+.grp .gl{font-weight:600;color:var(--ink);margin:0 0 5px;font-size:13.5px}
+.row{display:grid;grid-template-columns:minmax(92px,150px) 1fr 44px;align-items:center;gap:10px;margin:3px 0}
+.row .rl{color:var(--ink-2);font-size:13px;line-height:1.25}
+.row .rv{font-variant-numeric:tabular-nums;color:var(--ink);text-align:right;font-weight:500}
+.track{position:relative;height:18px;background:var(--track);border-radius:4px}
+.bar{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:var(--accent);outline:none}
+.bar.r{background:var(--base)}
+.bar.leak{background:var(--leak)}
+.marker{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+.bar[data-tip]:hover::after,.bar[data-tip]:focus::after{content:attr(data-tip);position:absolute;left:100%;top:50%;transform:translate(8px,-50%);background:var(--ink);color:var(--bg);font-size:12px;padding:4px 8px;border-radius:5px;white-space:nowrap;z-index:5;pointer-events:none}
+.bar[data-tip]:hover,.bar[data-tip]:focus{filter:brightness(1.08)}
+.axis{display:grid;grid-template-columns:minmax(92px,150px) 1fr 44px;gap:10px;font-size:11.5px;color:var(--ink-3);margin-top:4px}
+.axis .ticks{display:flex;justify-content:space-between}
+.duo{display:grid;grid-template-columns:1fr;gap:22px}
+@media (min-width:760px){.duo{grid-template-columns:1fr 1fr}.duo .row{grid-template-columns:minmax(88px,120px) 1fr 40px}}
+.duo h4{font-family:var(--sans);font-size:13.5px;margin:0 0 8px;color:var(--ink)}
+.tbl{overflow-x:auto;margin:20px 0 26px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:14px;font-variant-numeric:tabular-nums;min-width:520px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal;min-width:150px}
+th{font-weight:600;color:var(--ink-2);font-size:12.5px;border-bottom:1.5px solid var(--ink-3)}
+tr.hl td{background:var(--accent-soft)}
+tr.bad td{color:var(--leak)}
+table.text{min-width:0}
+table.text th,table.text td{text-align:left;white-space:normal;overflow-wrap:anywhere}
+table.text td:first-child{min-width:0;color:var(--ink-2);font-weight:500}
+.tcap{font-family:var(--sans);font-size:13px;color:var(--ink-3);margin:-14px 0 24px}
+.note{font-family:var(--sans);font-size:15px;background:var(--warn-bg);color:var(--ink);border-left:3px solid var(--warn-ink);padding:14px 18px;border-radius:0 8px 8px 0;margin:22px 0}
+.note b{color:var(--warn-ink)}
+.timeline{font-family:var(--sans);font-size:13px;margin:22px 0 26px}
+.tl{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center}
+.tl div{padding:10px 6px;border-radius:6px;background:var(--track);color:var(--ink-2)}
+.tl .f{background:var(--accent-soft);color:var(--ink)}
+.tl .lab{background:var(--ink);color:var(--bg)}
+.tl small{display:block;font-size:11.5px;opacity:.8}
+.tlcap{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center;color:var(--ink-3);font-size:12px;margin-top:6px}
+ol.recs{list-style:none;padding:0;counter-reset:r}
+ol.recs li{counter-increment:r;position:relative;padding:16px 18px 14px 58px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;margin:0 0 12px}
+ol.recs li::before{content:counter(r);position:absolute;left:18px;top:15px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--sans);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+ol.recs .act{font-family:var(--sans);font-weight:600;font-size:16px;display:block;margin-bottom:4px}
+ol.recs .code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink-3);display:block;margin-bottom:6px}
+ol.recs p{font-size:16.5px;margin:0}
+.nogo{font-family:var(--sans);font-size:15px;columns:1}
+@media (min-width:700px){.nogo{columns:2;column-gap:28px}}
+.nogo li{break-inside:avoid;margin:0 0 8px}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:56px;padding:26px 0 60px;font-family:var(--sans);font-size:13px;color:var(--ink-3)}
+@media (min-width:1100px){footer{grid-column:2}}
+.credit{font-family:var(--sans);font-size:16px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:18px 20px}
+.toggle{position:fixed;right:14px;top:14px;font-family:var(--sans);font-size:12px;background:var(--surface);color:var(--ink-2);border:1px solid var(--rule);border-radius:999px;padding:6px 12px;cursor:pointer;z-index:10}
+@media print{.toggle,nav.toc{display:none}body{background:#fff}figure,.abstract{break-inside:avoid}}
+</style>
+</head>
+<body>
+<button class="toggle" id="theme" aria-label="Toggle light or dark theme">◐ Theme</button>
+<div class="wrap">
+
+<header class="hero">
+  <p class="kicker">Research paper · FlyRank ML Internship · Lane 4: CTR opportunity</p>
+  <h1>Which pages keep losing clicks for their search position, and which should an editor fix first?</h1>
+  <div class="byline"><span><b>Maksim Nikolin</b></span><span>October 2026</span><span>Built on the FlyRank ML Internship dataset</span></div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <p class="t">Contents</p>
+  <ol>
+    <li><a href="#abstract">Abstract</a></li>
+    <li><a href="#intro">1 · Introduction</a></li>
+    <li><a href="#data">2 · Data</a></li>
+    <li><a href="#method">3 · Methodology</a></li>
+    <li><a href="#results">4 · Results</a></li>
+    <li><a href="#limits">5 · Limitations</a></li>
+    <li><a href="#recs">6 · Recommendations</a></li>
+    <li><a href="#repro">7 · Reproducibility</a></li>
+    <li><a href="#credit">8 · Acknowledgments</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section class="abstract" id="abstract" aria-labelledby="abs-h">
+  <h2 id="abs-h">Abstract</h2>
+  <p>Some pages already rank in positions 1–20 yet earn far fewer clicks than their position usually brings; this paper asks which of them keep doing so, and which an editor should review first. Using an anonymized 30,000-page slice of FlyRank's production search data (9,664 eligible pages from 28 clients), plus a one-month replication check on the ~79M-row internship warehouse, I labelled a page as under-capturing when its click-through rate (CTR) in the <em>next</em> 30 days fell below half the pooled CTR of its position bucket. A random forest that sees only the preceding month was compared with a transparent rule on clients it never saw, under client-grouped and time-forward validation, with explicit leakage tests. On unseen clients the model measured precision@50 of 0.80 against 0.70 for the rule (label base rate 37.8%), a gap that narrows to 0.74 vs 0.70 in the stricter time-forward test; separately, pages with a gap two months running stayed under 66% of the time, against 50% after a single month. The result is a decision-support review queue with reason codes and human-review rules, not evidence that rewriting a title recovers clicks.</p>
+</section>
+
+<div class="keys" role="list">
+  <div class="key" role="listitem"><div class="v">0.80 <small>vs 0.70</small></div><div class="l">precision@50 on unseen clients: model vs rule</div></div>
+  <div class="key" role="listitem"><div class="v">0.74 <small>vs 0.70</small></div><div class="l">the same, trained on the past and tested on the next month</div></div>
+  <div class="key" role="listitem"><div class="v">66% <small>vs 50%</small></div><div class="l">gap persists after two months vs after one</div></div>
+  <div class="key base" role="listitem"><div class="v">37.8%</div><div class="l">base rate: what random picking would get</div></div>
+</div>
+
+<section id="intro">
+<h2><span class="n">1</span>Introduction: a cheap opportunity hidden in noise</h2>
+<p>Picture an editor on a Monday with time for twenty pages. One page sits at position 4 on Google and is shown a hundred thousand times a month, yet earns a fraction of the clicks its neighbours at position 4 get. The visibility is already paid for; the snippet or the match to search intent is the likely problem. That page looks like the cheapest win in the portfolio.</p>
+<p>The obvious rule is <em>"flag every page whose CTR is below half of what its position usually gets."</em> It works, but it hides a cost: CTR over a month is noisy, and in this data about 4 in 10 flagged pages were no longer under-capturing the month after (half, when the gap had appeared only that month). Editors working from the raw rule spend hours on pages that would have recovered anyway.</p>
+<p>So the research question is narrow and practical: <strong>can a model that weighs several signals rank the <em>lasting</em> gaps higher than the rule does, on clients it has never seen?</strong> And if it can, how should that ranking turn into editorial actions without overclaiming?</p>
+<p>FlyRank's own public report on AI-driven SEO already observed a steep drop in CTR from top positions to deep ones. This work starts one step later: <em>within</em> a given position, which pages fall short, and does it last?</p>
+</section>
+
+<section id="data">
+<h2><span class="n">2</span>Data</h2>
+<p>Two sources, used for different jobs. All identifiers are pseudonymous codes used only to group the validation split. No titles, domains, URLs or search queries appear anywhere in this paper; every number is an aggregate.</p>
+<div class="tbl"><table class="text">
+  <thead><tr><th></th><th>Starter slice (main results)</th><th>Warehouse release (replication)</th></tr></thead>
+  <tbody>
+    <tr><td>Source</td><td>anonymized CSV in the repo</td><td>FlyRank internship warehouse, build <code>…release_v20260703</code></td></tr>
+    <tr><td>Size</td><td>30,000 pages · 44 columns · 32 clients</td><td>~79M daily rows; I read the March 2026 partition (9.8M rows)</td></tr>
+    <tr><td>Windows</td><td>three consecutive 30-day windows</td><td>Mar 1–15 → Mar 16–31, 2026</td></tr>
+    <tr><td>Grain used</td><td>one page</td><td>one page per half-month</td></tr>
+    <tr><td>Eligible pages</td><td>9,664 pages · 28 clients</td><td>57,439 pages · 36 clients</td></tr>
+  </tbody>
+</table></div>
+<p class="tcap">Table 1. The starter slice carries the main analysis; the warehouse month is an independent check with a shorter window.</p>
+<p>The starter slice reports 90-day totals plus the previous and the last 30 days, so the earliest window is the remainder (90 days minus the other two). I checked that it is never negative.</p>
+<h3>What I excluded, and why</h3>
+<ul>
+  <li><strong>Positions outside 1–20:</strong> too few clicks to compare CTR fairly (20,256 of 30,000 pages remain).</li>
+  <li><strong>Pages under 1,000 impressions in 90 days, or under 100 in either modeled month:</strong> a CTR built on a handful of views is noise (9,664 remain).</li>
+  <li><strong>Every column that contains or is computed from the label month:</strong> last-30-day metrics as features, 90-day totals, the dataset's trend fields, and the "days since last update" snapshot.</li>
+  <li><strong>Client and page IDs as features:</strong> they are used only to keep whole clients out of training.</li>
+</ul>
+</section>
+
+<section id="method">
+<h2><span class="n">3</span>Methodology</h2>
+<div class="timeline" aria-label="Timeline of windows">
+  <div class="tl"><div>Days 61–90<small>earliest month</small></div><div class="f">Days 31–60<small>features</small></div><div class="lab">Last 30 days<small>label</small></div></div>
+  <div class="tlcap"><span>time-forward training features</span><span>main features · time-forward training label</span><span>never a feature</span></div>
+</div>
+<p><strong>Label (observed in a later window).</strong> A page <em>stays under</em> when its CTR in the label month is below half of the pooled CTR of its narrow position bucket (1–3, 3–5, 5–10, 10–15, 15–20) in that same month. I use narrow buckets because CTR was not monotonic across coarse tiers in this data: the "positions 11–20" tier pooled at roughly the same CTR as "4–10".</p>
+<p><strong>Features</strong> come only from the month before the label, plus static context: impressions, clicks and sessions (logged), CTR, CTR relative to its bucket, average position, content age, word count, intent and content type.</p>
+<p><strong>Baseline</strong>, frozen before any model was trained: flag when CTR is below half of the bucket CTR, score by missed clicks (the clicks the page would have earned at bucket CTR), reason code <code>LOW_CTR_FOR_POSITION</code>.</p>
+<p><strong>Models.</strong> Logistic regression as the readable reference; a random forest (300 trees, minimum leaf 20) as the main model; shallow gradient boosting as a check; and the playbook ranking, <em>forest probability × missed clicks</em>, which ranks by expected missed clicks rather than by certainty alone.</p>
+<p><strong>Validation.</strong> Five folds grouped by client, so every test client is unseen. Then a stricter <em>time-forward + grouped</em> design: train on the earliest month → features month, test on the features month → label month, again on unseen clients. Every metric sits next to its base rate. Precision@50 is the main metric because an editor works the top of the list; the share of all missed clicks captured by the top 50 guards against a list full of tiny pages.</p>
+<p><strong>Assumptions.</strong> Pooled bucket CTR is a fair "expected CTR" within this portfolio; 100 impressions are enough to estimate a month's CTR; the 90-day average position is close enough to the month's position. The last one is tested below.</p>
+<h3>Leakage checks</h3>
+<p>A model that quietly reads the answer looks brilliant and is worthless, so I attacked my own pipeline. If adding a leaky column did <em>not</em> send the score toward perfect, the test harness itself would be broken.</p>
+<div class="tbl"><table>
+  <thead><tr><th>Feature set (random forest, grouped by client)</th><th>ROC-AUC</th><th>Precision@50</th></tr></thead>
+  <tbody>
+    <tr class="hl"><td>Honest feature set</td><td>0.79</td><td>0.80</td></tr>
+    <tr class="bad"><td>+ CTR in the label month (deliberate leak)</td><td>1.00</td><td>1.00</td></tr>
+    <tr class="bad"><td>+ 90-day clicks, which contain the label month</td><td>0.86</td><td>1.00</td></tr>
+    <tr><td>+ the dataset's trend field (overlaps the label month)</td><td>0.80</td><td>0.79</td></tr>
+    <tr><td>− average position (the one known overlap)</td><td>0.79</td><td>0.80</td></tr>
+  </tbody>
+</table></div>
+<p class="tcap">Table 2. The harness catches planted leaks; removing the 90-day position barely moves the honest score. The same planted-leak test on the warehouse month went from 0.76 to 1.00 ROC-AUC.</p>
+</section>
+
+<section id="results">
+<h2><span class="n">4</span>Results</h2>
+<h3>The validation design changes the number</h3>
+<figure>
+  <p class="ft">Precision@50 for the same random forest under three validation designs</p>
+  <p class="fs">Share of the top 50 pages that really stayed under next month · mean of 5 folds</p>
+  <div class="legend"><span><span class="sw m"></span>Random forest</span><span><span class="sw r"></span>Week-4 rule</span><span><span class="sw line"></span>Base rate</span></div>
+  <div class="chart" role="img" aria-label="Random split: model 0.88, rule 0.80. Grouped by client: model 0.80, rule 0.70. Time-forward and grouped: model 0.74, rule 0.70. Base rate about 0.36 to 0.38.">
+    <div class="grp"><p class="gl">Random split (pages from a client on both sides)</p>
+      <div class="row"><span class="rl">Model</span><div class="track"><div class="bar" style="width:88.4%" tabindex="0" data-tip="Model · 0.884"></div><div class="marker" style="left:37.8%"></div></div><span class="rv">0.88</span></div>
+      <div class="row"><span class="rl">Rule</span><div class="track"><div class="bar r" style="width:80.4%" tabindex="0" data-tip="Rule · 0.804"></div><div class="marker" style="left:37.8%"></div></div><span class="rv">0.80</span></div></div>
+    <div class="grp"><p class="gl">Grouped by client (test clients unseen)</p>
+      <div class="row"><span class="rl">Model</span><div class="track"><div class="bar" style="width:80.4%" tabindex="0" data-tip="Model · 0.804"></div><div class="marker" style="left:35.5%"></div></div><span class="rv">0.80</span></div>
+      <div class="row"><span class="rl">Rule</span><div class="track"><div class="bar r" style="width:69.6%" tabindex="0" data-tip="Rule · 0.696"></div><div class="marker" style="left:35.5%"></div></div><span class="rv">0.70</span></div></div>
+    <div class="grp"><p class="gl">Time-forward + grouped (past → next month, unseen clients)</p>
+      <div class="row"><span class="rl">Model</span><div class="track"><div class="bar" style="width:74.4%" tabindex="0" data-tip="Model · 0.744"></div><div class="marker" style="left:35.5%"></div></div><span class="rv">0.74</span></div>
+      <div class="row"><span class="rl">Rule</span><div class="track"><div class="bar r" style="width:69.6%" tabindex="0" data-tip="Rule · 0.696"></div><div class="marker" style="left:35.5%"></div></div><span class="rv">0.70</span></div></div>
+    <div class="axis"><span></span><div class="ticks"><span>0</span><span>0.25</span><span>0.5</span><span>0.75</span><span>1</span></div><span></span></div>
+  </div>
+  <figcaption><b>Takeaway:</b> the stricter the test, the smaller the model's lead. On unseen clients it measured 0.80 vs 0.70; trained on the past and scored on the next month it measured 0.74 vs 0.70 (ROC-AUC 0.78 vs 0.70). The random split's higher score comes mostly from how pages fall into folds, since the rule, which learns nothing, rises by the same amount.</figcaption>
+</figure>
+
+<h3>Model vs baseline on the same folds</h3>
+<div class="tbl"><table>
+  <thead><tr><th>Ranking (grouped by client, 5 folds)</th><th>ROC-AUC</th><th>P@20</th><th>P@50</th><th>P@50 fold range</th><th>Clicks captured@50</th></tr></thead>
+  <tbody>
+    <tr><td>Week-4 rule (baseline)</td><td>0.70</td><td>0.76</td><td>0.70</td><td>0.54–0.86</td><td>0.39</td></tr>
+    <tr><td>Logistic regression</td><td>0.77</td><td>0.80</td><td>0.77</td><td>0.54–0.96</td><td>0.08</td></tr>
+    <tr><td>Random forest</td><td>0.79</td><td>0.87</td><td>0.80</td><td>0.62–0.94</td><td>0.21</td></tr>
+    <tr><td>Gradient boosting (depth 3)</td><td>0.78</td><td>0.86</td><td>0.74</td><td>0.50–0.96</td><td>0.27</td></tr>
+    <tr class="hl"><td>Random forest × missed clicks (playbook)</td><td>0.72</td><td>0.82</td><td>0.70</td><td>0.54–0.84</td><td>0.41</td></tr>
+  </tbody>
+</table></div>
+<p class="tcap">Table 3. Base rate in the test folds: 35.5% (37.8% over all modeled pages). "Clicks captured@50" is the share of all clicks actually missed in the label month that sits in the top 50.</p>
+
+<figure>
+  <p class="ft">Precision and value pull in different directions</p>
+  <p class="fs">Grouped by client · mean of 5 folds · same rankings as Table 3</p>
+  <div class="duo chart" role="img" aria-label="Precision at 50 and clicks captured at 50 for five rankings. The random forest leads precision at 0.80 but captures 0.21 of missed clicks; the playbook ranking captures 0.41 at 0.70 precision; the rule captures 0.39 at 0.70.">
+    <div><h4>Precision@50: is the gap real?</h4>
+      <div class="row"><span class="rl">Rule</span><div class="track"><div class="bar r" style="width:69.6%" tabindex="0" data-tip="0.696"></div></div><span class="rv">0.70</span></div>
+      <div class="row"><span class="rl">Logistic reg.</span><div class="track"><div class="bar" style="width:76.8%" tabindex="0" data-tip="0.768"></div></div><span class="rv">0.77</span></div>
+      <div class="row"><span class="rl">Random forest</span><div class="track"><div class="bar" style="width:80.4%" tabindex="0" data-tip="0.804"></div></div><span class="rv">0.80</span></div>
+      <div class="row"><span class="rl">Grad. boosting</span><div class="track"><div class="bar" style="width:74%" tabindex="0" data-tip="0.740"></div></div><span class="rv">0.74</span></div>
+      <div class="row"><span class="rl">Playbook</span><div class="track"><div class="bar" style="width:70.4%" tabindex="0" data-tip="0.704"></div></div><span class="rv">0.70</span></div>
+    </div>
+    <div><h4>Clicks captured@50: is it worth the time?</h4>
+      <div class="row"><span class="rl">Rule</span><div class="track"><div class="bar r" style="width:38.5%" tabindex="0" data-tip="0.385"></div></div><span class="rv">0.39</span></div>
+      <div class="row"><span class="rl">Logistic reg.</span><div class="track"><div class="bar" style="width:7.5%" tabindex="0" data-tip="0.075"></div></div><span class="rv">0.08</span></div>
+      <div class="row"><span class="rl">Random forest</span><div class="track"><div class="bar" style="width:20.8%" tabindex="0" data-tip="0.208"></div></div><span class="rv">0.21</span></div>
+      <div class="row"><span class="rl">Grad. boosting</span><div class="track"><div class="bar" style="width:27.3%" tabindex="0" data-tip="0.273"></div></div><span class="rv">0.27</span></div>
+      <div class="row"><span class="rl">Playbook</span><div class="track"><div class="bar" style="width:40.6%" tabindex="0" data-tip="0.406"></div></div><span class="rv">0.41</span></div>
+    </div>
+  </div>
+  <figcaption><b>Takeaway:</b> ranked by certainty alone, every model fills its top 50 with small pages it is sure about, so it captures fewer missed clicks than the rule. Multiplying the forest's probability by missed clicks recovers the value (0.41 vs 0.39) at about the rule's precision. More model complexity did not, by itself, make a better queue.</figcaption>
+</figure>
+
+<h3>Gaps that repeat are the ones that last</h3>
+<figure>
+  <p class="ft">Share of pages still under-capturing next month, by their gap history</p>
+  <p class="fs">Pages with ≥ 100 impressions in each of three consecutive months · descriptive, not causal</p>
+  <div class="chart" role="img" aria-label="No gap: 14 percent. Gap two months ago only: 44 percent. Gap last month only: 50 percent. Gap two months running: 66 percent.">
+    <div class="row"><span class="rl">No gap (n=4,319)</span><div class="track"><div class="bar" style="width:14.5%" tabindex="0" data-tip="14.5% · 4,319 pages"></div></div><span class="rv">14%</span></div>
+    <div class="row"><span class="rl">2 months ago only (n=1,206)</span><div class="track"><div class="bar" style="width:44.1%" tabindex="0" data-tip="44.1% · 1,206 pages"></div></div><span class="rv">44%</span></div>
+    <div class="row"><span class="rl">Last month only (n=1,400)</span><div class="track"><div class="bar" style="width:49.9%" tabindex="0" data-tip="49.9% · 1,400 pages"></div></div><span class="rv">50%</span></div>
+    <div class="row"><span class="rl">2 months running (n=2,700)</span><div class="track"><div class="bar" style="width:66.2%" tabindex="0" data-tip="66.2% · 2,700 pages"></div></div><span class="rv">66%</span></div>
+    <div class="axis"><span></span><div class="ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div><span></span></div>
+  </div>
+  <figcaption><b>Takeaway:</b> a gap seen two months running stayed the next month 66% of the time, against 50% for a one-month gap and 14% for pages with no gap. Older pages showed the same direction: among flagged pages, the gap persisted 58% of the time under 180 days of age and 66% past 365 days.</figcaption>
+</figure>
+
+<h3>What the errors look like</h3>
+<p>About 23% of the forest's top-10% picks recovered on their own. Those false positives were thinner pages (median about 950 impressions vs 1,600 for correct picks), and both groups had a median of zero clicks, so for small pages "zero clicks" is partly chance. The worst individual errors shared an impression swing: confident false positives lost 70–90% of their impressions while clicks held, and the biggest misses roughly tripled their impressions while CTR halved. As a group the swing is weak, so I treat "query-mix shift" as a hypothesis, not a finding.</p>
+<p>On the warehouse month, with different windows and five simpler features, a logistic regression on unseen clients measured ROC-AUC 0.76 and precision@50 of 0.76 against a 50% base rate. That's a separate setup, not a benchmark of the model above, but it points the same way.</p>
+</section>
+
+<section id="limits">
+<h2><span class="n">5</span>Limitations and honest framing</h2>
+<div class="note"><b>What this work does not show:</b> that rewriting a title or refreshing a page recovers clicks. No edit was made or randomized. Pages with a recorded update in the last 30 days kept their gaps about as often as others (60% vs 61%), and because those updates were not aimed at CTR, that is not evidence either way.</div>
+<ul>
+  <li><strong>A small, uneven client base.</strong> 28 clients, and one of them holds 39% of modeled pages. Precision@50 for the model ranged from 0.62 to 0.94 across folds; differences of a few points are within that noise.</li>
+  <li><strong>A slice, not the full warehouse.</strong> The main results come from a 30,000-page slice. The warehouse check covers one month with half-month windows; it supports the direction, not the exact numbers.</li>
+  <li><strong>One known window overlap.</strong> Average position is a 90-day figure that overlaps the label month. Removing it barely changes the score, but bucket assignment still depends on it.</li>
+  <li><strong>No query-level signal.</strong> The model can't see which queries a page is shown for, which is the likely cause of its worst errors.</li>
+  <li><strong>Portfolio-relative expectations.</strong> "Expected CTR" is pooled within these clients, not an industry benchmark, and search-result features such as ads or answer boxes aren't observed.</li>
+  <li><strong>Time.</strong> Three months of one export. Seasonality and search-engine changes are untested.</li>
+</ul>
+</section>
+
+<section id="recs">
+<h2><span class="n">6</span>Ranked recommendations: the action playbook</h2>
+<p>The queue scores the latest month for the month ahead (9,752 pages) and ranks by <em>forest probability × missed clicks</em>. On unseen clients, one month ahead, that ranking measured precision@50 of 0.71 vs 0.70 for the rule and captured 0.42 vs 0.39 of missed clicks: about the same order. Its added value is the <strong>reason codes and actions</strong> that tell an editor <em>what</em> to do. In order:</p>
+<ol class="recs">
+  <li><span class="act">Rewrite title and meta first on persistent gaps at positions 1–5</span><span class="code">REWRITE_TITLE_META · GAP_TWO_MONTHS + TOP_POSITION</span><p>Visible and losing the click two months running; the snippet is the most likely lever. 24 of the top 100.</p></li>
+  <li><span class="act">At positions 5–20, check intent before polishing the snippet</span><span class="code">REWRITE_TITLE_META + INTENT_CHECK</span><p>The page may answer a different question than the searcher's. The largest group: 38 of the top 100.</p></li>
+  <li><span class="act">Give aging pages a freshness review on top</span><span class="code">REWRITE_TITLE_META + FRESHNESS_REVIEW · AGING_PAGE</span><p>Pages older than a year carried more gaps and kept them longer. 14 of the top 100.</p></li>
+  <li><span class="act">Look at the query mix before editing pages whose impressions halved or doubled</span><span class="code">CHECK_QUERY_MIX · CAUTION_IMPRESSION_SHIFT</span><p>These produced the model's worst errors. 13 of the top 100.</p></li>
+  <li><span class="act">Re-check one-month gaps next month instead of editing</span><span class="code">RECHECK_NEXT_MONTH</span><p>About half of them don't repeat. 8 of the top 100 (3 more are watch-only, with no current gap).</p></li>
+</ol>
+<p><strong>Cost and value.</strong> Under my assumed editing times, the top 50 is about 23 editor hours and holds roughly 7,800 missed clicks a month, against about 400 for 50 random gap pages. That concentration is partly by construction, since the ranking includes missed clicks. How many of those clicks an edit would win back has not been measured; that needs a held-back comparison group.</p>
+<h3>Human review and the no-go list</h3>
+<p>Every row is reviewed by a person, who checks the page's real queries, the live search results page, any caution codes, recent edits or redirects, and the client's brand and legal wording, and then logs the change. Never automate:</p>
+<ul class="nogo">
+  <li>publishing title or meta rewrites, AI-written or otherwise;</li>
+  <li>deleting, noindexing, merging or redirecting pages;</li>
+  <li>rewriting body content of aging pages;</li>
+  <li>client-facing "scores" or judging editors by them;</li>
+  <li>promising click gains to a client;</li>
+  <li>acting on navigational, thin-data or impression-shift pages without the checks.</li>
+</ul>
+<h3>When to stop trusting the queue</h3>
+<p>Retrain or fall back to the rule when last month's realized precision@50 drops below 0.60, the share of under-capturing pages moves more than 10 points, any bucket's expected CTR shifts more than 25%, or feature drift (PSI) exceeds 0.2; retrain every quarter regardless. To finally measure whether edits help, hold back a random ~20% of edit candidates each month and compare.</p>
+</section>
+
+<section id="repro">
+<h2><span class="n">7</span>Reproducibility</h2>
+<p>Everything runs from the public repository <a href="https://github.com/MaksimNikolin/FlyRank">github.com/MaksimNikolin/FlyRank</a>, with fixed seed 42, scikit-learn 1.9 and pandas. Clone, install the requirements, and run the notebooks top to bottom; the starter slice ships with the repo. The warehouse check needs your own Hugging Face read token and runs in Colab.</p>
+<div class="tbl"><table class="text">
+  <thead><tr><th>Notebook</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><a href="https://github.com/MaksimNikolin/FlyRank/blob/main/work/notebooks/capstone.ipynb">capstone.ipynb</a></td><td>Recomputes every number here and checks them against this page</td></tr>
+    <tr><td><a href="https://github.com/MaksimNikolin/FlyRank/blob/main/work/notebooks/w03_data_contract.ipynb">w03_data_contract.ipynb</a></td><td>Warehouse data contract and planted-leak test</td></tr>
+    <tr><td><a href="https://github.com/MaksimNikolin/FlyRank/blob/main/work/notebooks/w04_baseline_score.ipynb">w04_baseline_score.ipynb</a></td><td>The frozen baseline rule</td></tr>
+    <tr><td><a href="https://github.com/MaksimNikolin/FlyRank/blob/main/work/notebooks/w05_model.ipynb">w05_model.ipynb</a></td><td>Models vs baseline on client-grouped folds</td></tr>
+    <tr><td><a href="https://github.com/MaksimNikolin/FlyRank/blob/main/work/notebooks/w06_validation_audit.ipynb">w06_validation_audit.ipynb</a></td><td>Split before/after, leakage audit, claim rewrite</td></tr>
+    <tr><td><a href="https://github.com/MaksimNikolin/FlyRank/blob/main/work/notebooks/w07_action_playbook.ipynb">w07_action_playbook.ipynb</a></td><td>The ranked queue, reason codes, monitoring</td></tr>
+  </tbody>
+</table></div>
+<p>The numbers live in committed JSON receipts: <a href="https://github.com/MaksimNikolin/FlyRank/blob/main/work/outputs/capstone_metrics.json">capstone_metrics.json</a> and <a href="https://github.com/MaksimNikolin/FlyRank/blob/main/work/outputs/playbook_metrics.json">playbook_metrics.json</a>. The ranked queue itself is regenerated by the Week-7 notebook and is not committed, by design.</p>
+</section>
+
+<section id="credit">
+<h2><span class="n">8</span>Acknowledgments and data credit</h2>
+<p class="credit">Built on the <a href="https://flyrank.ai" target="_blank" rel="noopener">FlyRank ML Internship dataset</a>: observable search and engagement signals from FlyRank's production portfolio, pseudonymized before release. Thanks to the FlyRank ML internship team for the data, the review sessions and the standard of honest claims this paper tries to meet.</p>
+<h3>References</h3>
+<ol style="font-size:16px">
+  <li>FlyRank (2026). <a href="https://state-of-seo-2026.flyrank.ai/" target="_blank" rel="noopener">The State of AI-Driven SEO: FlyRank Data Report</a>, April 2026.</li>
+  <li>Pedregosa F. et al. (2011). Scikit-learn: Machine Learning in Python. <em>Journal of Machine Learning Research</em> 12, 2825–2830.</li>
+</ol>
+</section>
+
+</main>
+
+<footer>© 2026 Maksim Nikolin · Decision-support research on pseudonymized, aggregated data · No client names, URLs or queries are published.</footer>
+</div>
+<script>
+(function(){
+  var root=document.documentElement,btn=document.getElementById('theme');
+  try{var s=localStorage.getItem('theme');if(s)root.setAttribute('data-theme',s);}catch(e){}
+  btn.addEventListener('click',function(){
+    var dark=root.getAttribute('data-theme')?root.getAttribute('data-theme')==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    var next=dark?'light':'dark';root.setAttribute('data-theme',next);
+    try{localStorage.setItem('theme',next);}catch(e){}
+  });
+  var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id);});}});},{rootMargin:'-20% 0px -70% 0px'});
+    document.querySelectorAll('main section[id]').forEach(function(s){io.observe(s);});
+  }
+})();
+</script>
+</body>
+</html>

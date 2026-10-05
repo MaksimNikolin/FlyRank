@@ -1,0 +1,265 @@
+{
+  "data": {
+    "starter_rows": 30000,
+    "starter_cols": 44,
+    "starter_clients": 32,
+    "model_pages": 9664,
+    "model_clients": 28,
+    "funnel": [
+      {
+        "step": "starter slice",
+        "pages": 30000,
+        "clients": 32
+      },
+      {
+        "step": "positions 1-20",
+        "pages": 20256,
+        "clients": 31
+      },
+      {
+        "step": ">= 1,000 impressions in 90 days",
+        "pages": 10011,
+        "clients": 28
+      },
+      {
+        "step": ">= 100 impressions in each modeled window",
+        "pages": 9664,
+        "clients": 28
+      }
+    ],
+    "warehouse_check": {
+      "partition_rows": 9841378,
+      "lane_pages": 57439,
+      "lane_clients": 36,
+      "logreg_auc": 0.758,
+      "logreg_p50": 0.76,
+      "base_rate": 0.504,
+      "leaked_auc": 1.0
+    }
+  },
+  "label_base_rate": 0.3782,
+  "leakage": [
+    {
+      "variant": "Honest feature set",
+      "roc_auc": 0.791,
+      "p@50": 0.804
+    },
+    {
+      "variant": "+ CTR in the label window (leak)",
+      "roc_auc": 0.997,
+      "p@50": 1.0
+    },
+    {
+      "variant": "+ 90-day clicks (contains label window)",
+      "roc_auc": 0.86,
+      "p@50": 1.0
+    },
+    {
+      "variant": "+ trend_pct (overlapping field)",
+      "roc_auc": 0.796,
+      "p@50": 0.792
+    },
+    {
+      "variant": "- avg_position (known 90-day overlap)",
+      "roc_auc": 0.788,
+      "p@50": 0.8
+    }
+  ],
+  "main_grouped": [
+    {
+      "method": "Week-4 rule (baseline)",
+      "roc_auc": 0.703,
+      "p@20": 0.76,
+      "p@50": 0.696,
+      "clicks_captured@50": 0.385,
+      "base_rate": 0.355,
+      "p@50 min": 0.54,
+      "p@50 max": 0.86
+    },
+    {
+      "method": "Logistic regression",
+      "roc_auc": 0.772,
+      "p@20": 0.8,
+      "p@50": 0.768,
+      "clicks_captured@50": 0.075,
+      "base_rate": 0.355,
+      "p@50 min": 0.54,
+      "p@50 max": 0.96
+    },
+    {
+      "method": "Random forest",
+      "roc_auc": 0.791,
+      "p@20": 0.87,
+      "p@50": 0.804,
+      "clicks_captured@50": 0.208,
+      "base_rate": 0.355,
+      "p@50 min": 0.62,
+      "p@50 max": 0.94
+    },
+    {
+      "method": "Gradient boosting (depth 3)",
+      "roc_auc": 0.779,
+      "p@20": 0.86,
+      "p@50": 0.74,
+      "clicks_captured@50": 0.273,
+      "base_rate": 0.355,
+      "p@50 min": 0.5,
+      "p@50 max": 0.96
+    },
+    {
+      "method": "Random forest x missed clicks (playbook)",
+      "roc_auc": 0.717,
+      "p@20": 0.82,
+      "p@50": 0.704,
+      "clicks_captured@50": 0.406,
+      "base_rate": 0.355,
+      "p@50 min": 0.54,
+      "p@50 max": 0.84
+    }
+  ],
+  "designs": [
+    {
+      "design": "Random 5-fold",
+      "model_auc": 0.807,
+      "model_p@50": 0.884,
+      "rule_p@50": 0.804,
+      "base_rate": 0.378
+    },
+    {
+      "design": "Grouped by client",
+      "model_auc": 0.791,
+      "model_p@50": 0.804,
+      "rule_p@50": 0.696,
+      "base_rate": 0.355
+    },
+    {
+      "design": "Time-forward + grouped",
+      "model_auc": 0.779,
+      "model_p@50": 0.744,
+      "rule_p@50": 0.696,
+      "base_rate": 0.355
+    }
+  ],
+  "time_forward_pages": 9625,
+  "largest_client_share": 0.392,
+  "per_fold_p50": [
+    {
+      "fold": 1,
+      "Week-4 rule (baseline)": 0.86,
+      "Random forest": 0.94,
+      "Random forest x missed clicks (playbook)": 0.84,
+      "test pages": 3785,
+      "test clients": 1,
+      "base rate": 0.452
+    },
+    {
+      "fold": 2,
+      "Week-4 rule (baseline)": 0.78,
+      "Random forest": 0.82,
+      "Random forest x missed clicks (playbook)": 0.76,
+      "test pages": 1483,
+      "test clients": 4,
+      "base rate": 0.388
+    },
+    {
+      "fold": 3,
+      "Week-4 rule (baseline)": 0.54,
+      "Random forest": 0.62,
+      "Random forest x missed clicks (playbook)": 0.54,
+      "test pages": 1470,
+      "test clients": 4,
+      "base rate": 0.235
+    },
+    {
+      "fold": 4,
+      "Week-4 rule (baseline)": 0.72,
+      "Random forest": 0.82,
+      "Random forest x missed clicks (playbook)": 0.82,
+      "test pages": 1463,
+      "test clients": 9,
+      "base rate": 0.406
+    },
+    {
+      "fold": 5,
+      "Week-4 rule (baseline)": 0.58,
+      "Random forest": 0.82,
+      "Random forest x missed clicks (playbook)": 0.56,
+      "test pages": 1463,
+      "test clients": 10,
+      "base rate": 0.295
+    }
+  ],
+  "persistence": [
+    {
+      "history": "no gap",
+      "share": 0.145,
+      "pages": 4319
+    },
+    {
+      "history": "gap 2 months ago only",
+      "share": 0.441,
+      "pages": 1206
+    },
+    {
+      "history": "gap last month only",
+      "share": 0.499,
+      "pages": 1400
+    },
+    {
+      "history": "gap 2 months running",
+      "share": 0.662,
+      "pages": 2700
+    }
+  ],
+  "playbook": {
+    "receipt_time_forward_grouped": [
+      {
+        "ranking": "Frozen Week-4 rule",
+        "precision@50": 0.696,
+        "clicks_gap_captured@50": 0.3864,
+        "base_rate": 0.3549
+      },
+      {
+        "ranking": "Playbook queue (p x missed clicks)",
+        "precision@50": 0.712,
+        "clicks_gap_captured@50": 0.4192,
+        "base_rate": 0.3549
+      }
+    ],
+    "top100_actions": {
+      "REWRITE_TITLE_META + INTENT_CHECK": 38,
+      "REWRITE_TITLE_META": 24,
+      "REWRITE_TITLE_META + FRESHNESS_REVIEW": 14,
+      "CHECK_QUERY_MIX": 13,
+      "RECHECK_NEXT_MONTH": 8,
+      "NO_ACTION": 3
+    },
+    "top50": {
+      "editor_hours_assumed": 22.8,
+      "clicks_at_stake_30d": 7808,
+      "random_50_gap_pages_clicks_at_stake": 416,
+      "expected_persisting_clicks_30d": 5672
+    },
+    "persistence_by_age": [
+      {
+        "age_band": "<=180 days",
+        "share_with_gap": 0.3465,
+        "pages": 3994,
+        "gap_persists_if_flagged": 0.5772
+      },
+      {
+        "age_band": "181-365 days",
+        "share_with_gap": 0.3586,
+        "pages": 3332,
+        "gap_persists_if_flagged": 0.5938
+      },
+      {
+        "age_band": "365+ days",
+        "share_with_gap": 0.4624,
+        "pages": 2299,
+        "gap_persists_if_flagged": 0.6642
+      }
+    ],
+    "scored_pages": 9752
+  }
+}

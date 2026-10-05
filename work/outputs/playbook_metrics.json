@@ -64,6 +64,14 @@
     "random_50_gap_pages_clicks_at_stake": 416,
     "expected_persisting_clicks_30d": 5672
   },
+  "top100_actions": {
+    "REWRITE_TITLE_META + INTENT_CHECK": 38,
+    "REWRITE_TITLE_META": 24,
+    "REWRITE_TITLE_META + FRESHNESS_REVIEW": 14,
+    "CHECK_QUERY_MIX": 13,
+    "RECHECK_NEXT_MONTH": 8,
+    "NO_ACTION": 3
+  },
   "monitoring": [
     {
       "check": "Label base rate: train month vs scoring month",
