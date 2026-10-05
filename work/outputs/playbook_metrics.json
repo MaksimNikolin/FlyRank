@@ -1,0 +1,107 @@
+{
+  "scored_pages": 9752,
+  "clients": 28,
+  "pages_with_current_gap": 3687,
+  "receipt_time_forward_grouped": [
+    {
+      "ranking": "Frozen Week-4 rule",
+      "precision@50": 0.696,
+      "clicks_gap_captured@50": 0.3864,
+      "base_rate": 0.3549
+    },
+    {
+      "ranking": "Playbook queue (p x missed clicks)",
+      "precision@50": 0.712,
+      "clicks_gap_captured@50": 0.4192,
+      "base_rate": 0.3549
+    }
+  ],
+  "persistence_by_history": [
+    {
+      "history": "no gap",
+      "share_under_next_month": 0.1447,
+      "pages": 4319
+    },
+    {
+      "history": "gap 2 months ago only",
+      "share_under_next_month": 0.4411,
+      "pages": 1206
+    },
+    {
+      "history": "gap last month only",
+      "share_under_next_month": 0.4986,
+      "pages": 1400
+    },
+    {
+      "history": "gap 2 months running",
+      "share_under_next_month": 0.6619,
+      "pages": 2700
+    }
+  ],
+  "persistence_by_age": [
+    {
+      "age_band": "<=180 days",
+      "share_with_gap": 0.3465,
+      "pages": 3994,
+      "gap_persists_if_flagged": 0.5772
+    },
+    {
+      "age_band": "181-365 days",
+      "share_with_gap": 0.3586,
+      "pages": 3332,
+      "gap_persists_if_flagged": 0.5938
+    },
+    {
+      "age_band": "365+ days",
+      "share_with_gap": 0.4624,
+      "pages": 2299,
+      "gap_persists_if_flagged": 0.6642
+    }
+  ],
+  "top50": {
+    "editor_hours_assumed": 22.8,
+    "clicks_at_stake_30d": 7808,
+    "random_50_gap_pages_clicks_at_stake": 416,
+    "expected_persisting_clicks_30d": 5672
+  },
+  "monitoring": [
+    {
+      "check": "Label base rate: train month vs scoring month",
+      "value": "42.5% -> 37.8%",
+      "status": "ok"
+    },
+    {
+      "check": "Max bucket expected-CTR change",
+      "value": "19.7%",
+      "status": "ok"
+    },
+    {
+      "check": "PSI ctr ratio (train vs scoring)",
+      "value": "0.025",
+      "status": "ok"
+    },
+    {
+      "check": "PSI log impressions",
+      "value": "0.149",
+      "status": "ok"
+    },
+    {
+      "check": "Receipt precision@50 (time-forward)",
+      "value": "0.71",
+      "status": "ok"
+    }
+  ],
+  "assumptions": {
+    "minutes_per_action": {
+      "REWRITE_TITLE_META": 20,
+      "REWRITE_TITLE_META + FRESHNESS_REVIEW": 45,
+      "REWRITE_TITLE_META + INTENT_CHECK": 40,
+      "CHECK_QUERY_MIX": 15,
+      "RECHECK_NEXT_MONTH": 3,
+      "MONITOR_ONE_MONTH": 3,
+      "MONITOR_ONLY": 2,
+      "NO_ACTION": 0
+    },
+    "recovery_rate": "NOT measured; scenarios 10/25/50%"
+  }
+}
